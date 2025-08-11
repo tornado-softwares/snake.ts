@@ -1,0 +1,14 @@
+{
+  "name": "snake",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/snake.js",
+    "dev": "nodemon"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
