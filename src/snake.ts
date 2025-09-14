@@ -26,8 +26,9 @@ class Game {
     public snake_parts: snake_part[] = []
     public score: number = 0
     public render_delay: number
-    start_timestamp:number = Date.now()
-    pending_snake_parts_count:number = 0
+    renders:number = 0
+    start_timestamp: number = Date.now()
+    pending_snake_parts_count: number = 0
     footer = "Welcome to snake.ts, press q to exit, arrows to set direction."
 
     constructor({ width, height, render_delay }: { width: number, height: number, render_delay: number }) {
@@ -40,14 +41,14 @@ class Game {
         this.start()
     }
 
-    async start(){
-        const sleep = (ms:number) => new Promise(res => setTimeout(res, ms))
-        while (true){
+    async start() {
+        const sleep = (ms: number) => new Promise(res => setTimeout(res, ms))
+        while (true) {
             this.render()
             await sleep(this.render_delay)
         }
     }
-    
+
 
     init() {
         readline.emitKeypressEvents(process.stdin);
@@ -97,15 +98,18 @@ class Game {
     }
 
     render() {
+        this.renders++
         readline.cursorTo(process.stdout, 0, -1);
         readline.clearScreenDown(process.stdout)
+        
+        const elapsed = Date.now() - this.start_timestamp;
+        const total_seconds = Math.floor(elapsed / 1000);
+        const seconds = total_seconds % 60; 
+        const total_minutes = Math.floor(total_seconds / 60);
+        const minutes = total_minutes % 60; 
+        const hours = Math.floor(total_minutes / 60);
 
-        const seconds = Math.floor((Date.now()- this.start_timestamp) / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-
-        if (this.pending_snake_parts_count>0) {
+        if (this.pending_snake_parts_count > 0) {
             this.snake_parts.push({
                 y: 1,
                 x: 1,
@@ -132,12 +136,12 @@ class Game {
         for (const snake_part of this.snake_parts) {
             const base_block = entities_index[this.entities[snake_part.y]![snake_part.x]!]
             this.score += base_block.score
-            this.pending_snake_parts_count+=base_block.score
-            if(this.render_delay > 100 ){
+            this.pending_snake_parts_count += base_block.score
+            if (this.render_delay > 100) {
                 this.render_delay -= 10 * base_block.score
             }
             if (base_block.collision == true) {
-                process.stdout.write(`Oh.. you loose well you made a score of ${this.score}, try again :) - later...`)
+                process.stdout.write(`Oh.. you loose well you made a score of ${this.score}, try again :) - later...\n`)
                 process.exit()
             }
             else {
@@ -157,7 +161,7 @@ class Game {
             }
         }
 
-        process.stdout.write(`Current score: ${this.score} | Render delay: ${this.render_delay} | Playing since ${days}d ${hours}h ${minutes}m ${seconds}s\n` + this.entities.map(entities_line => entities_line.map(index => entities_index[index].char).join("")).join('\n') + `\n${this.width - this.footer.length > 0 ? " ".repeat((this.width - this.footer.length) / 2) : ""}${this.footer}`)
+        process.stdout.write(`Current score: ${this.score} | Render delay: ${this.render_delay} | Playing since ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s | ~${(this.renders/total_seconds).toFixed(2)} FPS\n` + this.entities.map(entities_line => entities_line.map(index => entities_index[index].char).join("")).join('\n') + `\n${this.width - this.footer.length > 0 ? " ".repeat((this.width - this.footer.length) / 2) : ""}${this.footer}`)
     }
 
 }
